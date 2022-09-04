@@ -1,6 +1,6 @@
 #include "input.h"
 #include <stdio.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include "window.h"
 
 static uint8_t keys[256];
