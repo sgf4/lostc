@@ -12,4 +12,5 @@
 void input_init(void);
 bool input_getkey(uint8_t key);
 bool input_getkeydown(uint8_t key);
+void input_update_mouse_dir(void);
 iVec2 input_getmousedir();

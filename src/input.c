@@ -55,7 +55,5 @@ bool input_getkeydown(uint8_t key) {
 }
 
 iVec2 input_getmousedir() {
-    iVec2 v = mdirection;
-    //mdirection = (iVec2){0, 0};
-    return v;
+    return mdirection;
 }

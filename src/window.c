@@ -2,6 +2,7 @@
 
 #include <GL/freeglut_std.h>
 #include <GL/gl.h>
+#include <stdio.h>
 #include <world/world.h>
 #include <GL/freeglut.h>
 #include <gui/text.h>
@@ -13,6 +14,7 @@ int window_height = 480;
 iVec2 window_center;
 const char* window_title = "omg";
 void (*window_loop) (void);
+bool window_cursor_ishiden;
 
 static void resize_callback(int w, int h) {
     window_width = w;
@@ -21,15 +23,40 @@ static void resize_callback(int w, int h) {
     glViewport(0, 0, w, h);
 }
 
+static void show_fps() {
+    glEnable(GL_TEXTURE_2D);
+    char num[8];
+    sprintf(num, "%d", fps);
+    glColor3f(0.f, 1.f, 1.f);
+    glPushMatrix();
+    glTranslatef(0.f, 9.f, 0.f);
+    text(num);
+    glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+}
+
 static void window_updater() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (input_getkeydown(GLUT_KEY_F11)) {
         glutFullScreenToggle();
     }
-    
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    float aspect_ratio = (float)window_width/window_height; 
+    glOrtho(0.f, aspect_ratio*10.f, 0.f, 10.f, 0.f, 100.0f);
+    glMatrixMode(GL_MODELVIEW);
+
+    show_fps();
+
     time_update();
     window_loop();
+
     glutSwapBuffers();
     glutPostRedisplay();
+    if (window_cursor_ishiden) {
+        glutWarpPointer(window_width / 2, window_height / 2);
+    }
 }
 
 void window_init() {
@@ -47,6 +74,17 @@ void window_init() {
 
 void window_do_loop() {
     glutMainLoop();
+}
+
+void window_hide_cursor() {
+    glutSetCursor(GLUT_CURSOR_NONE);
+    window_cursor_ishiden = true;
+    
+}
+
+void window_unhide_cursor() {
+    glutSetCursor(GLUT_CURSOR_INHERIT);
+    window_cursor_ishiden = false;
 }
 
 void window_set_loop(void (*f) (void)) {

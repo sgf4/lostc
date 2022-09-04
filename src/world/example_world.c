@@ -34,6 +34,7 @@ void example_world_init() {
 
 void example_world_update() {
     world_update();
+    glEnable(GL_LIGHTING);
     GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0}; /* bright white */
     GLfloat light_specular[] = {1.0, 1.0, 1.0, 1.0};
 
@@ -51,6 +52,7 @@ void example_world_update() {
         main_menu_init();
         window_set_loop(main_menu_update);
     }
+    glDisable(GL_LIGHTING);
 }
 
 void example_world_destroy() {

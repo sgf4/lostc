@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <window.h>
 #include <textures/font.h>
-#include <GL/freeglut.h>
 #include <world/world.h>
 #include <input.h>
 #include "menu_list.h"
@@ -13,10 +12,7 @@
 
 void main_menu_init() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glutSetCursor(GLUT_CURSOR_INHERIT);
-    glEnable(GL_BLEND);
-    load_texture(&texture_font);
-    printf("main_menu\n");
+    window_unhide_cursor();
 }
 
 static unsigned int selected_opt = 0;
@@ -49,21 +45,16 @@ option_entry_t options[] = {
 static unsigned int noptions = sizeof(options)/sizeof(option_entry_t);
 
 void main_menu_update() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    float aspect_ratio = (float)window_width/window_height; 
-    glOrtho(0.f, aspect_ratio, 0.f, 1.f, 0.f, 100.0f);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glTranslatef(0.05f, 1.f-(0.05f*2.f), 0.f);
-    glScalef(0.05f, 0.05f, 0.05f);
+    glEnable(GL_TEXTURE_2D);
+    glPushMatrix();
+    glTranslatef(0.f, 5.f, 0.f);
+    //glScalef(0.5f, 0.5f, 0.5f);
 
-    if (input_getkeydown(GLUT_KEY_UP)) {
+    if (input_getkeydown(KEY_UP)) {
         if (selected_opt != 0) selected_opt--;
     }
 
-    if (input_getkeydown(GLUT_KEY_DOWN)) {
+    if (input_getkeydown(KEY_DOWN)) {
         if (selected_opt != noptions-1) selected_opt++;
     }
 
@@ -76,17 +67,16 @@ void main_menu_update() {
         text(options[i].str);
         glTranslatef(0.f, -2.f, 0.f);
     }
+    glPopMatrix();
 
     if (input_getkeydown('\r')) {
         options[selected_opt].fn();
     }
-
+    glDisable(GL_TEXTURE_2D);
 	//glRotatef(70.f, 0.f, 0.f, 1.f);
 
 }
 
 void main_menu_destroy() {
-    glDisable(GL_BLEND);
-    destroy_texture(&texture_font);
 }
 
