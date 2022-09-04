@@ -1,4 +1,3 @@
-#include "menu.h"
 #include <GL/gl.h>
 #include <textures/texture.h>
 #include <stdio.h>
