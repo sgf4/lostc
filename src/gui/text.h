@@ -1,0 +1,4 @@
+
+
+
+void text(const char*);
