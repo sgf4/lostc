@@ -1,5 +1,5 @@
 #include "world.h"
-#include <GL/freeglut_std.h>
+#include <GL/freeglut.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <stdio.h>
@@ -19,7 +19,7 @@ static void draw() {
     glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
     glMaterialf(GL_FRONT, GL_SHININESS, mat_shininess);
-    glutSolidSphere(1, 8, 8);
+    glutSolidTorus(1, 2, 32, 32);
     glPopMatrix();
 }
 

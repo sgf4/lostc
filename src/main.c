@@ -12,6 +12,7 @@ int main() {
     glDepthFunc(GL_LEQUAL);
     glShadeModel(GL_SMOOTH);
     glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
 
     // load essential textures
     load_texture(&texture_font);

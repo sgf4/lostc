@@ -25,8 +25,8 @@ static void resize_callback(int w, int h) {
 
 static void show_fps() {
     glEnable(GL_TEXTURE_2D);
-    char num[8];
-    sprintf(num, "%d", fps);
+    char num[5];
+    snprintf(num, 4, "%d", fps);
     glColor3f(0.f, 1.f, 1.f);
     glPushMatrix();
     glTranslatef(0.f, 9.f, 0.f);
@@ -41,16 +41,16 @@ static void window_updater() {
         glutFullScreenToggle();
     }
 
+    time_update();
+    window_loop();
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     float aspect_ratio = (float)window_width/window_height; 
     glOrtho(0.f, aspect_ratio*10.f, 0.f, 10.f, 0.f, 100.0f);
     glMatrixMode(GL_MODELVIEW);
-
+    glLoadIdentity();
     show_fps();
-
-    time_update();
-    window_loop();
 
     glutSwapBuffers();
     glutPostRedisplay();

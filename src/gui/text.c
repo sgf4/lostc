@@ -31,12 +31,11 @@ static const unsigned char font_size_map[] = {
 
 void text(const char* text) {
     use_texture(&texture_font);
-    int len = strlen(text);
     glPushAttrib(GL_TRANSFORM_BIT | GL_ENABLE_BIT);
     use_texture(&texture_font);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
-    for (int i=0; i<len; i++) {
+    for (int i=0; text[i] != '\0'; i++) {
         unsigned char c = text[i];
         int columns = 16;
         int px = c%columns*8;
