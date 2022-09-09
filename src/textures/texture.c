@@ -3,7 +3,7 @@
 
 Texture* current_texture;
 
-void load_texture(Texture* texture) {
+void texture_load(Texture* texture) {
     glGenTextures(1, &texture->id); 
     glBindTexture(GL_TEXTURE_2D, texture->id); 
     //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -13,16 +13,16 @@ void load_texture(Texture* texture) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture->data); 
 }
-void use_texture(Texture* texture) {
+void texture_use(Texture* texture) {
     current_texture = texture;
     glBindTexture(GL_TEXTURE_2D, texture->id);
 }
 
-void destroy_texture(Texture* texture) {
+void texture_destroy(Texture* texture) {
     glDeleteTextures(1, &texture->id);
 }
 
-void set_offset(Texture* texture, float offsetx, float offsety, float sizex, float sizey) {
+void texture_set_offset(Texture* texture, float offsetx, float offsety, float sizex, float sizey) {
     glPushAttrib(GL_TRANSFORM_BIT);
     glMatrixMode(GL_TEXTURE);
     glLoadIdentity();

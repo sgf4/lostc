@@ -15,7 +15,7 @@ int main() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
 
     // load essential textures
-    load_texture(&texture_font);
+    texture_load(&texture_font);
 
     main_menu_init();
     window_set_loop(main_menu_update);
@@ -23,6 +23,6 @@ int main() {
     //window_set_loop(world_update);
     window_do_loop();
     main_menu_destroy();
-    destroy_texture(&texture_font);
+    texture_destroy(&texture_font);
     return 0;
 }

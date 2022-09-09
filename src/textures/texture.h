@@ -7,8 +7,8 @@ typedef struct {
     const unsigned char* data;
 } Texture;
 
-void load_texture(Texture* texture);
-void destroy_texture(Texture* texture);
-void set_offset(Texture* texture, float offsetx, float offsety, float sizex, float sizey);
-void use_texture(Texture* texture);
+void texture_load(Texture* texture);
+void texture_destroy(Texture* texture);
+void texture_set_offset(Texture* texture, float offsetx, float offsety, float sizex, float sizey);
+void texture_use(Texture* texture);
 extern Texture* current_texture;

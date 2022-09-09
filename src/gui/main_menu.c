@@ -52,12 +52,10 @@ void main_menu_update() {
 
     if (input_getkeydown(KEY_UP)) {
         if (selected_opt != 0) selected_opt--;
-    }
-
-    if (input_getkeydown(KEY_DOWN)) {
+    } else if (input_getkeydown(KEY_DOWN)) {
         if (selected_opt != noptions-1) selected_opt++;
-    }
-
+    } 
+    
     for (unsigned int i=0; i<noptions; i++) {
         if (i == selected_opt) {
             glColor3f(1.f, 0.f, 0.f);

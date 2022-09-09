@@ -1,5 +1,6 @@
 #include "font.h"
 
+extern const unsigned char texture_font_data[];
 Texture texture_font = {
     128,
     128,

@@ -39,8 +39,8 @@ static void window_updater() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (input_getkeydown(GLUT_KEY_F11)) {
         glutFullScreenToggle();
-    }
-
+    } 
+    
     time_update();
     window_loop();
 
@@ -69,6 +69,7 @@ void window_init() {
     glutReshapeFunc(resize_callback);       // Register callback handler for window re-size event
     glutDisplayFunc(window_updater);
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
+    glutFullScreen();
     input_init();
 }
 

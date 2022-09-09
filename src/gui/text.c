@@ -30,9 +30,8 @@ static const unsigned char font_size_map[] = {
 };
 
 void text(const char* text) {
-    use_texture(&texture_font);
+    texture_use(&texture_font);
     glPushAttrib(GL_TRANSFORM_BIT | GL_ENABLE_BIT);
-    use_texture(&texture_font);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     for (int i=0; text[i] != '\0'; i++) {
@@ -41,7 +40,7 @@ void text(const char* text) {
         int px = c%columns*8;
         int py = c/columns*8;
         int size = font_size_map[c];
-	    set_offset(current_texture, px, py, size, 8);
+	    texture_set_offset(current_texture, px, py, size, 8);
         float sizef = size/5.f;
 		glBegin(GL_QUADS);
 			glTexCoord2d(0.f, 0.f);
