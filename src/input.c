@@ -43,6 +43,7 @@ void input_init() {
     //glutMouseFunc(mouse_callback);
     
     glutPassiveMotionFunc(mousemove_callback);
+    glutMotionFunc(mousemove_callback);
     
 }
 
