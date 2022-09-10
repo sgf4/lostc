@@ -1,34 +1,33 @@
-from os import access
 from pygltflib import GLTF2
-import base64
 import struct
-from numpy import array as nparray
 import pathlib
 import sys
 fname = pathlib.Path(sys.argv[1])
 gltf = GLTF2().load(fname)
 print(gltf.to_json(indent=4))
 
-print("meshes:", len(gltf.meshes))
+print('meshes:', len(gltf.meshes))
 models = {}
 
 for scene in gltf.scenes:
     for node in scene.nodes:
         node = gltf.nodes[node]
-        print("--", node.name, "--")
+        print('--', node.name, '--')
         name = node.name.lower()
+        models[node.name] = []
         
         for primitive in gltf.meshes[node.mesh].primitives:
             print(primitive)
             mode = primitive.mode
             attrs = primitive.attributes
+            material = gltf.materials[primitive.material] if primitive.material != None else None
             accessors = {
                 'pos': gltf.accessors[attrs.POSITION],
                 'normal': gltf.accessors[attrs.NORMAL],
                 'texcoord': gltf.accessors[attrs.TEXCOORD_0],
                 'indices': gltf.accessors[primitive.indices]
             }
-            model_data = {
+            primitive_data = {
                 'pos': [],
                 'normal': [],
                 'texcoord': [],
@@ -40,16 +39,16 @@ for scene in gltf.scenes:
                 if accessor == None:
                     continue
                 size = 0
-                fmt = ""
+                fmt = ''
                 if accessor.type == 'VEC3':
                     size = 4*3
-                    fmt = "<fff"
+                    fmt = '<fff'
                 elif accessor.type == 'VEC2':
                     size = 4*2
-                    fmt = "<ff"
+                    fmt = '<ff'
                 elif accessor.type == 'SCALAR':
                     size = 2
-                    fmt = "<H"
+                    fmt = '<H'
 
                 bufferview = gltf.bufferViews[accessor.bufferView]
                 buffer = gltf.buffers[bufferview.buffer]
@@ -60,42 +59,46 @@ for scene in gltf.scenes:
                 v_arr = []
                 for i in range(0, accessor.count):
                     data = accessor_data[i*size:i*size+size]
-                    model_data[name].append([round(n, 5) for n in struct.unpack(fmt, data)])
-            if len(model_data['indices'])%3 != 0:
+                    primitive_data[name].append([round(n, 5) for n in struct.unpack(fmt, data)])
+            if len(primitive_data['indices'])%3 != 0:
                 print('error')
                 exit()
 
-            model_data['indices'] = [i[0] for i in model_data['indices'] ]
-            model_data['indices'] = [model_data['indices'][i:i+3] for i in range(0, len(model_data['indices']), 3)]
-            for i in model_data['indices']:
-                model_data['faces'].append(
-                    [[model_data['pos'][n], model_data['normal'][n], model_data['texcoord'][n]] for n in i]
+            primitive_data['indices'] = [i[0] for i in primitive_data['indices'] ]
+            primitive_data['indices'] = [primitive_data['indices'][i:i+3] for i in range(0, len(primitive_data['indices']), 3)]
+            for i in primitive_data['indices']:
+                primitive_data['faces'].append(
+                    [[primitive_data['pos'][n], primitive_data['normal'][n], primitive_data['texcoord'][n]] for n in i]
                 )
 
-            models[node.name] = model_data
+            models[node.name].append(primitive_data)
 
-for name, model_data in models.items():
+for name, primitives in models.items():
     name = name.lower()
     outputc = open('src/models/' + name + '.c', 'w')
     outputh = open('src/models/' + name + '.h', 'w')
-    outputh.write("""#pragma once
+    outputh.write('''#pragma once
 #include "model.h"
 extern Model {0}_model;
-extern Face {0}_faces[];
-""".format(name))
-
-    outputc.write("""#include "{0}.h"
-Model {0}_model = {{
-    {1},
-    {0}_faces
+'''.format(name))
+    outputc.write('''#include "{0}.h"\n\n'''.format(name))
+    i = 0
+    for primitive in primitives:
+        outputc.write('''static Face faces_{0}[{1}] = {{
+    {2}
 }};
-Face {0}_faces[] = {{
-""".format(name, len(model_data['indices'])))
+'''.format(i, len(primitive['indices']), ',\n    '.join([str(face).replace('(', '{').replace(')', '}').replace('[', '{').replace(']', '}') for face in primitive['faces']])))
+        i+=1
+    outputc.write('''static Primitive primitives[{0}] = {{
+{1}
+}};
+    '''.format(len(primitives), ',\n'.join(['    {faces_' + str(i) + ', ' + str(len(primitives[i]['faces'])) + '}' for i in range(len(primitives))])))
 
-    for faces in model_data['faces']:
-        outputc.write('    ' + str(faces).replace('(', '{').replace(')', '}').replace('[', '{').replace(']', '}'))
-        outputc.write(',\n')
-
-    outputc.write('};\n')
+    outputc.write('''
+Model {0}_model = {{
+    primitives,
+    {1}
+}};
+'''.format(name, len(primitives)))
     outputh.close()
     outputc.close()

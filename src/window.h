@@ -3,7 +3,7 @@
 
 extern int window_width;
 extern int window_height;
-extern iVec2 window_center;
+extern vec2 window_center;
 extern const char* window_title;
 extern void (*window_loop) (void);
 extern void (*window_on_close) (void);

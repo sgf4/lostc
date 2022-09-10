@@ -3,8 +3,8 @@
 
 typedef struct {
     float sensibility;
-    Vec3 position;
-    Vec3 direction;
+    vec3 position;
+    vec3 direction;
 } Camera;
 
 extern Camera camera;

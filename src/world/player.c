@@ -12,7 +12,7 @@ Player player = {
 
 void player_update(Player* player) {
     if (player->is_you) {
-        iVec2 v = input_getmousedir();
+        vec2 v = input_getmousedir();
         camera.direction.x += v.y * camera.sensibility;
         camera.direction.y += v.x * camera.sensibility;
 

@@ -11,7 +11,7 @@
 
 int window_width = 640;
 int window_height = 480;
-iVec2 window_center;
+vec2 window_center;
 const char* window_title = "omg";
 void (*window_loop) (void);
 bool window_cursor_ishiden;
@@ -19,7 +19,7 @@ bool window_cursor_ishiden;
 static void resize_callback(int w, int h) {
     window_width = w;
     window_height = h;
-    window_center = (iVec2){w/2, h/2};
+    window_center = (vec2){w/2, h/2};
     glViewport(0, 0, w, h);
 }
 

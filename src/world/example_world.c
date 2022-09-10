@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <input.h>
 #include <gui/menu_list.h>
-#include <models/suzanne.h>
+#include <models/cube.h>
 
 static unsigned int listid;
 #define list_size 1
@@ -35,14 +35,14 @@ void example_world_init() {
     glEnable(GL_LIGHT0);
     listid = glGenLists(list_size);
     glNewList(listid, GL_COMPILE);
-    draw_model(&suzanne_model);
+    draw_model(&cube_model);
     glEndList();
 
     glNewList(listid+1, GL_COMPILE);
     glutSolidCube(1);
     glEndList();
 
-    player.position = (Vec3){0.f, 0.f, -5.f};
+    player.position = (vec3){0.f, 0.f, -5.f};
 }
 
 void example_world_update() {

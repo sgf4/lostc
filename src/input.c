@@ -4,8 +4,8 @@
 #include "window.h"
 
 static uint8_t keys[256];
-static iVec2 mpos;
-static iVec2 mdirection;
+static vec2 mpos;
+static vec2 mdirection;
 
 static void keydown_callback(unsigned char key, int x, int y) {
     keys[key] = 1;
@@ -26,7 +26,7 @@ static void specialup_callback(int key, int x, int y) {
 }
 
 static void mousemove_callback(int x, int y) {
-    iVec2 pos = {x, y};
+    vec2 pos = {x, y};
     mdirection = window_center;
     ivec2_subv(mdirection, pos);
     ivec2_muln(mdirection, -1);
@@ -55,6 +55,6 @@ bool input_getkeydown(uint8_t key) {
     return keys[key] == 1 ? keys[key]++ : 0;
 }
 
-iVec2 input_getmousedir() {
+vec2 input_getmousedir() {
     return mdirection;
 }

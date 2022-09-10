@@ -2,9 +2,9 @@
 #include <vec.h>
 
 typedef struct {
-    Vec3 position;
-    Vec3 normal;
-    Vec3 tex;
+    vec3 position;
+    vec3 normal;
+    vec3 tex;
 } Vertex;
 
 typedef struct {
@@ -13,9 +13,15 @@ typedef struct {
     Vertex c;
 } Face;
 
+// Group of Faces
 typedef struct {
+    Face* faces;
     unsigned int nfaces;
-    const Face* faces;
+} Primitive;
+
+typedef struct {
+    Primitive* primitives;
+    unsigned int nprimitives;
 } Model;
 
-extern void draw_model(Model* m);
+extern void draw_model(const Model* m);
