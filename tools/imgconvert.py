@@ -37,6 +37,6 @@ for pixel in pixel_values:
     output_c.write('    ')
     output_c.write(', '.join(["0x{:02x}".format(v) for v in pixel]))
     output_c.write(',\n')
-output_c.write('};')
+output_c.write('};\n')
 output_c.close()
 

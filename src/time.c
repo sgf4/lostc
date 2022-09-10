@@ -1,6 +1,5 @@
 #include "time.h"
 #include <GL/freeglut.h>
-#include <stdio.h>
 
 float time_delta;
 float time_now;
@@ -15,7 +14,6 @@ void time_update() {
     time_now = now;
 
     if (time_now >= next_t) {
-        printf("%d\n", fps);
         fps = fcount;
         fcount = 0;
         next_t = time_now+1;

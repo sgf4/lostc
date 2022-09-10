@@ -23,9 +23,6 @@ static void on_play() {
     window_set_loop(example_world_update);   
 }
 
-static void on_fuck() {
-}
-
 static void on_exit() { 
     main_menu_destroy();
     window_destroy();
@@ -38,7 +35,6 @@ typedef struct {
 
 option_entry_t options[] = {
     {"play", on_play},
-    {"fuck", on_fuck},
     {"exit", on_exit}
 };
 
