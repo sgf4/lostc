@@ -1,3 +1,4 @@
 .vscode/
 build/
 lostc
+tools/__pycache__
