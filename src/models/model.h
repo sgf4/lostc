@@ -1,5 +1,6 @@
 #pragma once
 #include <vec.h>
+#include <textures/texture.h>
 
 typedef struct {
     vec3 position;
@@ -13,8 +14,13 @@ typedef struct {
     Vertex c;
 } Face;
 
+typedef struct {
+    Texture* texture;
+} Material;
+
 // Group of Faces
 typedef struct {
+    Material* m;
     Face* faces;
     unsigned int nfaces;
 } Primitive;

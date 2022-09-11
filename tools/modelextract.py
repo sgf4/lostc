@@ -1,21 +1,64 @@
-from pygltflib import GLTF2
+import pygltflib
+from os.path import exists
+from os import remove
 import struct
 import pathlib
-import sys
-fname = pathlib.Path(sys.argv[1])
-gltf = GLTF2().load(fname)
-print(gltf.to_json(indent=4))
+import argparse
+from imgconvert import convertimg
+
+
+parser = argparse.ArgumentParser(description="Convert gltf to C model")
+parser.add_argument("file", metavar="FILE", type=str, help="Path file")
+args = parser.parse_args()
+
+fname = pathlib.Path(args.file)
+gltf = pygltflib.GLTF2().load(fname)
+#print(gltf.to_json(indent=4))
+
+
+def bufferview_data(bufferview: pygltflib.BufferView) -> memoryview:
+    buffer = gltf.buffers[bufferview.buffer]
+    buffer_data = gltf.get_data_from_buffer_uri(buffer.uri)
+    return memoryview(buffer_data)[bufferview.byteOffset:bufferview.byteOffset+bufferview.byteLength]
+
+def accessor_data(accessor: pygltflib.Accessor) -> memoryview:
+    bufferview = gltf.bufferViews[accessor.bufferView]
+    bv_data = bufferview_data(bufferview)
+    return memoryview(bv_data)[accessor.byteOffset:accessor.byteOffset+accessor.count*size]
 
 print('meshes:', len(gltf.meshes))
-models = {}
+# process images
+for image in gltf.images:
+    print('-- image', image.name, '--')
+    bv = gltf.bufferViews[image.bufferView]
+    bv_data = bufferview_data(bv)
+    imgpath = 'tools/' + image.name + '.png'
+    f = open(imgpath, 'wb')
+    f.write(bv_data)
+    f.close()
+    convertimg(imgpath)
+    remove(imgpath)
 
+# process all objects in the scene
 for scene in gltf.scenes:
     for node in scene.nodes:
         node = gltf.nodes[node]
         print('--', node.name, '--')
-        name = node.name.lower()
-        models[node.name] = []
-        
+        m_name = node.name.lower()
+        primitives = []
+        m_cpath = 'src/models/' + m_name + '.c'
+        m_hpath = 'src/models/' + m_name + '.h'
+        m_outputc = open(m_cpath, 'w')
+        if not exists(m_hpath):
+            outputh = open(m_hpath, 'w')
+            outputh.write('''#pragma once
+#include "model.h"
+extern Model {0}_model;
+'''.format(m_name))
+            outputh.close()
+
+        m_outputc.write('''#include "{0}.h"\n\n'''.format(m_name))
+        primitive_count = 0
         for primitive in gltf.meshes[node.mesh].primitives:
             print(primitive)
             mode = primitive.mode
@@ -31,8 +74,7 @@ for scene in gltf.scenes:
                 'pos': [],
                 'normal': [],
                 'texcoord': [],
-                'indices': [],
-                'faces': []
+                'indices': []
             }
 
             for name, accessor in accessors.items():
@@ -50,55 +92,28 @@ for scene in gltf.scenes:
                     size = 2
                     fmt = '<H'
 
-                bufferview = gltf.bufferViews[accessor.bufferView]
-                buffer = gltf.buffers[bufferview.buffer]
-
-                buffer_data = gltf.get_data_from_buffer_uri(buffer.uri)
-                bufferview_data = memoryview(buffer_data)[bufferview.byteOffset:bufferview.byteOffset+bufferview.byteLength]
-                accessor_data = memoryview(bufferview_data)[accessor.byteOffset:accessor.byteOffset+accessor.count*size]
-                v_arr = []
+                acc_data = accessor_data(accessor)
+ 
                 for i in range(0, accessor.count):
-                    data = accessor_data[i*size:i*size+size]
+                    data = acc_data[i*size:i*size+size]
                     primitive_data[name].append([round(n, 5) for n in struct.unpack(fmt, data)])
+
             if len(primitive_data['indices'])%3 != 0:
                 print('error')
                 exit()
 
             primitive_data['indices'] = [i[0] for i in primitive_data['indices'] ]
             primitive_data['indices'] = [primitive_data['indices'][i:i+3] for i in range(0, len(primitive_data['indices']), 3)]
+            m_outputc.write('static Face faces_{0}[{1}] = {{\n'.format(primitive_count, len(primitive_data['indices'])))
+
             for i in primitive_data['indices']:
-                primitive_data['faces'].append(
-                    [[primitive_data['pos'][n], primitive_data['normal'][n], primitive_data['texcoord'][n]] for n in i]
-                )
+                face = [[primitive_data['pos'][n], primitive_data['normal'][n], primitive_data['texcoord'][n]] for n in i]
+                m_outputc.write('    ' + str(face).replace('(', '{').replace(')', '}').replace('[', '{').replace(']', '}') + ',\n')
 
-            models[node.name].append(primitive_data)
+            m_outputc.write('};\n')
+            primitive_count += 1
 
-for name, primitives in models.items():
-    name = name.lower()
-    outputc = open('src/models/' + name + '.c', 'w')
-    outputh = open('src/models/' + name + '.h', 'w')
-    outputh.write('''#pragma once
-#include "model.h"
-extern Model {0}_model;
-'''.format(name))
-    outputc.write('''#include "{0}.h"\n\n'''.format(name))
-    i = 0
-    for primitive in primitives:
-        outputc.write('''static Face faces_{0}[{1}] = {{
-    {2}
-}};
-'''.format(i, len(primitive['indices']), ',\n    '.join([str(face).replace('(', '{').replace(')', '}').replace('[', '{').replace(']', '}') for face in primitive['faces']])))
-        i+=1
-    outputc.write('''static Primitive primitives[{0}] = {{
-{1}
-}};
-    '''.format(len(primitives), ',\n'.join(['    {faces_' + str(i) + ', ' + str(len(primitives[i]['faces'])) + '}' for i in range(len(primitives))])))
-
-    outputc.write('''
-Model {0}_model = {{
-    primitives,
-    {1}
-}};
-'''.format(name, len(primitives)))
-    outputh.close()
-    outputc.close()
+        m_outputc.write('static Primitive primitives[] = {{\n{1}\n}};\n'.format(primitive_count, ',\n'.join(['    {{0, faces_{0}, sizeof(faces_{0})/sizeof(Face)}}'.format(i) for i in range(primitive_count)])))
+        m_outputc.write('Model {0}_model = {{ primitives, {1} }};\n'.format(m_name, primitive_count))
+        
+        m_outputc.close()

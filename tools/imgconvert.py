@@ -1,42 +1,47 @@
 from PIL import Image
 from PIL.ImageOps import flip
-import argparse
+from os.path import exists
+import sys
 import os
 
-parser = argparse.ArgumentParser(description="Convert img to pixel data C")
-parser.add_argument("file", metavar="FILE", type=str, help="Path file")
+def convertimg(imagename):
+    texture_path = 'src/textures/'
+    name = os.path.basename(imagename).split(".")[0]
+    im = flip(Image.open(imagename, "r"))
+    width, height = im.size
+    pixel_values = list(im.getdata())
+    hpath = texture_path + name + '.h'
+    cpath = texture_path + name + '.c'
 
-texture_path = 'src/textures/'
-args = parser.parse_args()
-name = os.path.basename(args.file).split(".")[0]
-im = flip(Image.open(args.file, "r"))
-width, height = im.size
-pixel_values = list(im.getdata())
-output_h = open(texture_path + name + '.h', 'w')
-output_c = open(texture_path + name + '.c', 'w')
-
-output_h.write("""#pragma once
+    output_c = open(cpath, 'w')
+    if not exists(hpath):
+        output_h = open(hpath, 'w')
+        output_h.write("""#pragma once
 #include "texture.h"
 
 extern Texture texture_{0};
-extern const unsigned char texture_{0}_data[];
 """.format(name))
-output_h.close()
+        output_h.close()
 
-output_c.write("""#include "{0}.h"
+    output_c.write("""#include "{0}.h"
 
+static const unsigned char texture_data[] = {{
+""".format(name))
+    for pixel in pixel_values:
+        output_c.write('    ')
+        output_c.write(', '.join(["0x{:02x}".format(v) for v in pixel]))
+        output_c.write(',\n')
+    output_c.write('};\n')
+    output_c.write("""
 Texture texture_{0} = {{
     {1},
     {2},
     0,
-    texture_{0}_data
+    texture_data
 }};
-const unsigned char texture_{0}_data[] = {{
 """.format(name, width, height))
-for pixel in pixel_values:
-    output_c.write('    ')
-    output_c.write(', '.join(["0x{:02x}".format(v) for v in pixel]))
-    output_c.write(',\n')
-output_c.write('};\n')
-output_c.close()
 
+    output_c.close()
+
+if __name__ == "__main__":
+    convertimg(sys.argv[1])

@@ -12,13 +12,11 @@ static unsigned int listid;
 
 static void draw() {
     GLfloat mat_specular[] = {1.0, 1.0, 1.0, 1.0}; /* bright white */
-    GLfloat mat_diffuse[] = {0.0, 1.0, 0.0, 1.0};
-    GLfloat mat_ambient[] = {0.0, 0.4, 0.0, 1.0}; /* same as diffuse */
+    GLfloat mat_diffuse[] = {0.0, 1.0, 1.0, 1.0};
+    GLfloat mat_ambient[] = {0.0, 0.4, 0.4, 1.0}; /* same as diffuse */
     GLfloat mat_shininess = 5.f;
 
-    static int i = 0;
     glPushMatrix();
-    glRotatef((float)i++, 0, 1, 0);
     glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
     glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);

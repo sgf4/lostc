@@ -1,13 +1,7 @@
 #include "font.h"
 
-Texture texture_font = {
-    128,
-    128,
-    0,
-    texture_font_data
-};
-const unsigned char texture_font_data[] = {
-    0xff, 0xff, 0xff, 0x00,
+    static const unsigned char texture_data[] = {
+        0xff, 0xff, 0xff, 0x00,
     0xff, 0xff, 0xff, 0x00,
     0xff, 0xff, 0xff, 0x00,
     0xff, 0xff, 0xff, 0x00,
@@ -16392,3 +16386,11 @@ const unsigned char texture_font_data[] = {
     0xff, 0xff, 0xff, 0x00,
     0xff, 0xff, 0xff, 0x00,
 };
+
+    Texture texture_font = {
+        128,
+        128,
+        0,
+        texture_data
+    };
+    
