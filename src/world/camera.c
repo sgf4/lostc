@@ -3,7 +3,7 @@
 #include "camera.h"
 #include "../window.h"
 
-Camera camera = {.sensibility=0.5f};
+Camera camera = {.sensibility=50.f};
 
 void camera_update() {
     glMatrixMode(GL_PROJECTION);

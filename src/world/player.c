@@ -15,8 +15,8 @@ Player player = {
 void player_update(Player* player) {
     if (player->is_you) {
         ivec2 v = input_getmousedir();
-        camera.direction.x += v.y * camera.sensibility;
-        camera.direction.y += v.x * camera.sensibility;
+        camera.direction.x += v.y * camera.sensibility * time_delta;
+        camera.direction.y += v.x * camera.sensibility * time_delta;
 
         float dir_x = cos(camera.direction.y * (3.14159265 / 180)) * time_delta * 5.f;
         float dir_z = sin(camera.direction.y * (3.14159265 / 180)) * time_delta * 5.f;
