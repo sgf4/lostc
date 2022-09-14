@@ -22,7 +22,7 @@ static void warn_fn(png_structp png_ptr, png_const_charp msg) {
     printf("error: %s", msg);
 }
 
-void texture_load_fn(Texture* texture) {
+void texture_load(Texture* texture) {
     png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, warn_fn, error_fn);
     png_infop info = png_create_info_struct(png);
 

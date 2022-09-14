@@ -3,6 +3,7 @@ TARGET    := lostc
 OBJ_DIR   := build
 SRC_DIR   := src
 RES_DIR   := res
+TEXTURE_DIR := $(RES_DIR)/textures
 
 SRC_FILES := $(shell find $(SRC_DIR) -type f -name "*.c") 
 RES_FILES := $(shell find $(RES_DIR) -type f) 
@@ -25,10 +26,10 @@ segf: $(TARGET)
 $(TARGET): $(OBJ_SUBDIRS) $(OBJ_FILES)
 	$(CC) -o $@ $(OBJ_FILES) $(LDFLAGS)
 
-$(OBJ_DIR)/$(RES_DIR)%.o: $(RES_DIR)%
-	$(eval F := $(basename $(notdir $<)))
-	$(eval SN := $(basename $(shell echo $(<) | sed -e 's/^res\///;s/.\//_/')))
-	$(LD) -r -b binary -r $< -o $@ --defsym=$(SN)_start=_binary_res_textures_$(F)_png_start 
+$(OBJ_DIR)/$(TEXTURE_DIR)/%.o: $(TEXTURE_DIR)/%
+	python3 tools/imgconvert.py $<
+	$(CC) $(CFLAGS) -c a.c -o $@
+	rm a.c
 
 $(OBJ_DIR)/$(SRC_DIR)%.o: $(SRC_DIR)%.c
 	$(CC) -MMD -MD $(CFLAGS) -c $< -o $@

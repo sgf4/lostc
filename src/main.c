@@ -5,7 +5,7 @@
 #include "gui/menu_list.h"
 
 
-EXTERN_TEXTURE(font);
+TEXTURE(font);
 
 int main() {
     window_init();
