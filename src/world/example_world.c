@@ -1,11 +1,12 @@
-#include "world.h"
-#include <GL/freeglut.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <stdio.h>
-#include <input.h>
-#include <gui/menu_list.h>
-#include <models/cube.h>
+
+#include "world.h"
+#include "../window.h"
+#include "../input.h"
+#include "../gui/menu_list.h"
+#include "../models/cube.h"
 
 static unsigned int listid;
 #define list_size 1
@@ -27,6 +28,7 @@ static void draw() {
 
 
 void example_world_init() {
+    window_set_update(example_world_update); 
     world_init();
     // Prepare lights
     glEnable(GL_NORMALIZE);
@@ -36,9 +38,9 @@ void example_world_init() {
     draw_model(&cube_model);
     glEndList();
 
-    glNewList(listid+1, GL_COMPILE);
-    glutSolidCube(1);
-    glEndList();
+    //glNewList(listid+1, GL_COMPILE);
+    //glutSolidCube(1);
+    //glEndList();
 
     player.position = (vec3){0.f, 0.f, -5.f};
 }
@@ -58,10 +60,9 @@ void example_world_update() {
 
     draw();
 
-    if (input_getkeydown(KEY_ESC)) {
+    if (input_getkeydown(KEY_ESCAPE)) {
         example_world_destroy();
         main_menu_init();
-        window_set_loop(main_menu_update);
     }
     glDisable(GL_LIGHTING);
 }

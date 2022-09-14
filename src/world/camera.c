@@ -1,11 +1,9 @@
-#include "camera.h"
-#include "world.h"
-#include <window.h>
-#include <input.h>
-#include <math.h>
 #include <GL/glu.h>
 
-Camera camera = {.sensibility=0.1f};
+#include "camera.h"
+#include "../window.h"
+
+Camera camera = {.sensibility=0.5f};
 
 void camera_update() {
     glMatrixMode(GL_PROJECTION);

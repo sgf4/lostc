@@ -1,8 +1,8 @@
 #include "text.h"
 #include <string.h>
-#include <textures/texture.h>
 #include <GL/gl.h>
-#include <textures/font.h>
+
+#include "../texture.h"
 
 static const unsigned char font_size_map[] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -29,6 +29,7 @@ static const unsigned char font_size_map[] = {
     5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 
 };
 
+TEXTURE(font);
 void text(const char* text) {
     texture_use(&texture_font);
     glPushAttrib(GL_TRANSFORM_BIT | GL_ENABLE_BIT);

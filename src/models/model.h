@@ -1,6 +1,6 @@
 #pragma once
-#include <vec.h>
-#include <textures/texture.h>
+#include "../vec.h"
+#include "../texture.h"
 
 typedef struct {
     vec3 position;

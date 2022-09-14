@@ -1,25 +1,27 @@
-#include "window.h"
-
-#include <GL/freeglut_std.h>
-#include <GL/gl.h>
 #include <stdio.h>
-#include <world/world.h>
-#include <GL/freeglut.h>
-#include <gui/text.h>
-#include <input.h>
-#include <time.h>
+#include <stdlib.h>
+#include <GLFW/glfw3.h>
+
+#include "window.h"
+#include "gui/text.h"
+#include "input.h"
+#include "time.h"
 
 int window_width = 640;
 int window_height = 480;
-vec2 window_center;
+ivec2 window_center;
 const char* window_title = "omg";
-void (*window_loop) (void);
 bool window_cursor_ishiden;
+bool window_fullscreen;
+bool window_vsync = true;
+GLFWwindow* window_glfw;
 
-static void resize_callback(int w, int h) {
+static void (*window_update_fn) (void);
+
+static void resize_callback(GLFWwindow* wnd, int w, int h) {
     window_width = w;
     window_height = h;
-    window_center = (vec2){w/2, h/2};
+    window_center = (ivec2){w/2, h/2};
     glViewport(0, 0, w, h);
 }
 
@@ -35,64 +37,96 @@ static void show_fps() {
     glDisable(GL_TEXTURE_2D);
 }
 
-static void window_updater() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if (input_getkeydown(GLUT_KEY_F11)) {
-        glutFullScreenToggle();
-    } 
-    
-    time_update();
-    window_loop();
+void window_set_fullscreen(bool v) {
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+    static ivec2 lastpos = {0, 0};
+    static ivec2 lastsize = {0, 0};
+    if (v) {
+        glfwGetWindowPos(window_glfw, &lastpos.x, &lastpos.y);
+        glfwGetWindowSize(window_glfw, &lastsize.x, &lastsize.y);
+        glfwSetWindowMonitor(window_glfw, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+    } else {
+        glfwSetWindowMonitor(window_glfw, NULL, lastpos.x, lastpos.y, lastsize.x, lastsize.y, mode->refreshRate);
+    }
+    window_fullscreen = v;
+}
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    float aspect_ratio = (float)window_width/window_height; 
-    glOrtho(0.f, aspect_ratio*10.f, 0.f, 10.f, 0.f, 100.0f);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    show_fps();
+void window_set_vsync(bool v) {
+    glfwSwapInterval(v);
+    window_vsync = v;
+}
 
-    glutSwapBuffers();
-    glutPostRedisplay();
-    if (window_cursor_ishiden) {
-        glutWarpPointer(window_width / 2, window_height / 2);
+void window_update() {
+    while (!glfwWindowShouldClose(window_glfw)) {
+        /* Render here */
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        if (input_getkeydown(KEY_F11)) {
+            window_set_fullscreen(!window_fullscreen);
+        }
+        
+        time_update();
+        window_update_fn();
+
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        float aspect_ratio = (float)window_width/window_height; 
+        glOrtho(0.f, aspect_ratio*10.f, 0.f, 10.f, 0.f, 100.0f);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        
+        show_fps();
+
+        /* Swap front and back buffers */
+        glfwSwapBuffers(window_glfw);
+
+        /* Poll for and process events */
+        glfwPollEvents();
     }
 }
 
 void window_init() {
-    int argc = 0;
-    glutInit(&argc, 0);            // Initialize GLUT
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH); // Enable double buffered mode
-    glutInitWindowSize(window_width, window_height);   // Set the window's initial width & height
-    glutInitWindowPosition(50, 50); // Position the window's initial top-left corner
-    glutSetWindow(glutCreateWindow(window_title));
-    glutReshapeFunc(resize_callback);       // Register callback handler for window re-size event
-    glutDisplayFunc(window_updater);
-    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
-    glutFullScreen();
+    if (!glfwInit()) {
+        fprintf(stderr, "ERROR: glfwInit()\n");
+    }
+
+    // OpenGL 1.0
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 1);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+    window_glfw = glfwCreateWindow(window_width, window_height, window_title, NULL, NULL);
+    if (!window_glfw) {
+        glfwTerminate();
+        fprintf(stderr, "ERROR: creating window\n");
+        exit(1);
+    }
+
+    glfwMakeContextCurrent(window_glfw);
+    glfwSetWindowSizeCallback(window_glfw, resize_callback);
+
     input_init();
 }
 
-void window_do_loop() {
-    glutMainLoop();
-}
-
 void window_hide_cursor() {
-    glutSetCursor(GLUT_CURSOR_NONE);
-    window_cursor_ishiden = true;
-    
+    glfwSetInputMode(window_glfw, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    window_cursor_ishiden = true;   
 }
 
 void window_unhide_cursor() {
-    glutSetCursor(GLUT_CURSOR_INHERIT);
+    glfwSetInputMode(window_glfw, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     window_cursor_ishiden = false;
 }
 
-void window_set_loop(void (*f) (void)) {
-    window_loop = f;
+void window_set_update(void (*fn) (void)) {
+    window_update_fn = fn;
 }
 
 void window_destroy() {
-    glutLeaveMainLoop();
+    glfwDestroyWindow(window_glfw);
+    glfwTerminate();
 }
 
+void window_close() {
+    glfwSetWindowShouldClose(window_glfw, 1);
+}

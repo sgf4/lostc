@@ -1,17 +1,18 @@
 #include <GL/gl.h>
-#include <textures/texture.h>
+
 #include <stdio.h>
-#include <window.h>
-#include <textures/font.h>
-#include <world/world.h>
-#include <input.h>
+#include "../texture.h"
+#include "../window.h"
+#include "../world/world.h"
+#include "../input.h"
 #include "menu_list.h"
 
 #include "text.h"
-#include "vec.h"
+#include "../vec.h"
 
 void main_menu_init() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    window_set_update(main_menu_update);
     window_unhide_cursor();
 }
 
@@ -20,12 +21,23 @@ static unsigned int selected_opt = 0;
 static void on_play() {
     main_menu_destroy();
     example_world_init();
-    window_set_loop(example_world_update);   
+}
+
+char vsync_str[] = "vsync on ";
+static void on_vsync() {
+    window_set_vsync(!window_vsync);
+    if (window_vsync) {
+        vsync_str[7] = 'n'; 
+        vsync_str[8] = ' ';
+    } else {
+        vsync_str[7] = 'f'; 
+        vsync_str[8] = 'f';
+    }
 }
 
 static void on_exit() { 
     main_menu_destroy();
-    window_destroy();
+    window_close();
 }
 
 typedef struct {
@@ -35,6 +47,7 @@ typedef struct {
 
 option_entry_t options[] = {
     {"play", on_play},
+    {vsync_str, on_vsync},
     {"exit", on_exit}
 };
 
@@ -63,7 +76,7 @@ void main_menu_update() {
     }
     glPopMatrix();
 
-    if (input_getkeydown('\r')) {
+    if (input_getkeydown(KEY_ENTER)) {
         options[selected_opt].fn();
     }
     glDisable(GL_TEXTURE_2D);

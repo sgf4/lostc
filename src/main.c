@@ -1,9 +1,11 @@
-#include "textures/texture.h"
-#include <textures/font.h>
-#include "window.h"
-#include <world/world.h>
-#include <gui/menu_list.h>
 #include <GL/gl.h>
+
+#include "texture.h"
+#include "window.h"
+#include "gui/menu_list.h"
+
+
+EXTERN_TEXTURE(font);
 
 int main() {
     window_init();
@@ -16,13 +18,14 @@ int main() {
 
     // load essential textures
     texture_load(&texture_font);
-
+    
     main_menu_init();
-    window_set_loop(main_menu_update);
+    window_update();
     //load_world(&example_world);
     //window_set_loop(world_update);
-    window_do_loop();
+    
     main_menu_destroy();
     texture_destroy(&texture_font);
+    window_destroy();
     return 0;
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include <vec.h>
+#include "../vec.h"
 #include <stdbool.h>
 
 typedef struct {

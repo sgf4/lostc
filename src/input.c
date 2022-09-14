@@ -1,60 +1,52 @@
-#include "input.h"
 #include <stdio.h>
-#include <GL/freeglut.h>
+#include <GLFW/glfw3.h>
+
+#include "input.h"
 #include "window.h"
 
-static uint8_t keys[256];
-static vec2 mpos;
-static vec2 mdirection;
+static uint8_t keys[512];
+static ivec2 mpos;
+static ivec2 mdirection;
 
-static void keydown_callback(unsigned char key, int x, int y) {
-    keys[key] = 1;
+static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+    keys[key] = action;
 }
 
-static void keyup_callback(unsigned char key, int x, int y) {
-    keys[key] = 0;
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT) {
+        keys[MOUSE_LEFT] = action;
+    } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+        keys[MOUSE_RIGHT] = action;
+    }
 }
 
-static void specialdown_callback(int key, int x, int y) {
-    if (key < 0) return;
-    keys[key] = 1;
-}
-
-static void specialup_callback(int key, int x, int y) {
-    if (key < 0) return;
-    keys[key] = 0;
-}
-
-static void mousemove_callback(int x, int y) {
-    vec2 pos = {x, y};
-    mdirection = window_center;
+static void cursor_position_callback(GLFWwindow* window, double x, double y) {
+    ivec2 pos = {x, y};
+    mdirection = mpos;
     ivec2_subv(mdirection, pos);
     ivec2_muln(mdirection, -1);
     mpos = pos;
 }
 
 void input_init() {
-    glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
-    glutKeyboardFunc(keydown_callback);
-    glutKeyboardUpFunc(keyup_callback);
-    glutSpecialFunc(specialdown_callback);
-    glutSpecialUpFunc(specialup_callback);
+    glfwSetKeyCallback(window_glfw, key_callback);
+    glfwSetCursorPosCallback(window_glfw, cursor_position_callback);
+    glfwSetMouseButtonCallback(window_glfw, mouse_button_callback);
 
     //glutMouseFunc(mouse_callback);
     
-    glutPassiveMotionFunc(mousemove_callback);
-    glutMotionFunc(mousemove_callback);
-    
 }
 
-bool input_getkey(uint8_t key) {
+bool input_getkey(unsigned int key) {
     return keys[key] > 0;
 }
 
-bool input_getkeydown(uint8_t key) {
+bool input_getkeydown(unsigned int key) {
     return keys[key] == 1 ? keys[key]++ : 0;
 }
 
-vec2 input_getmousedir() {
-    return mdirection;
+ivec2 input_getmousedir() {
+    ivec2 m = mdirection;
+    mdirection = (ivec2) {0, 0};
+    return m;
 }

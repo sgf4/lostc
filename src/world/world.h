@@ -5,9 +5,6 @@
 void world_init(void);
 void world_update(void);
 void world_destroy(void);
-void window_set_loop(void(*f)(void));
-void window_hide_cursor(void);
-void window_unhide_cursor(void);
 extern void (*world_update_f) (void);
 
 

@@ -9,7 +9,7 @@ typedef struct {
 typedef struct {
     int x;
     int y;
-} vec2;
+} ivec2;
 
 #define ivec2_opv(v1, v2, op) v1.x op##= v2.x, v1.y op##= v2.y
 #define ivec2_addv(v1, v2) ivec2_opv(v1, v2, +)

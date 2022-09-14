@@ -1,7 +1,8 @@
-#include "world.h"
 #include <GL/gl.h>
 #include <stdio.h>
-#include <window.h>
+#include "../window.h"
+
+#include "world.h"
 
 void world_init() {
     window_hide_cursor();
